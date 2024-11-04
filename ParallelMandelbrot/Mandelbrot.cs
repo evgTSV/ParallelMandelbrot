@@ -1,19 +1,42 @@
 ﻿using System.Drawing;
 using System.Numerics;
+using System.Security.Cryptography;
+using System.Text;
 using Raylib_cs;
 using Color = Raylib_cs.Color;
 
 namespace ParallelMandelbrot;
 
+public enum EvalMode
+{
+    Sequential,
+    Parallel
+}
+
 public static unsafe class Mandelbrot
 {
+    static Mandelbrot()
+    {
+        ToInitialState();
+    }
+    
+    public static void ToInitialState()
+    {
+        Center = new(0.0f, -0.75f);
+        Width = 2.5f;
+        Height = 2.5f;
+        Iterations = 100;
+    }
+    
     private static Color* _pixels = Raylib.New<Color>(0);
     private static Size _textureSize;
     
-    public static Complex Center = new(0.0f, -0.75f);
+    public static Complex Center;
     
-    public static float Width = 2.5f;
-    public static float Height = 2.5f;
+    public static float Width;
+    public static float Height;
+
+    public static int Iterations;
 
     public static Size TextureSize
     {
@@ -31,25 +54,49 @@ public static unsafe class Mandelbrot
 
     private static double ComputeColumn(int row, int countRows)
         => Center.Imaginary - Height / 2.0f + row * Width / countRows;
+
+    public static string Hash()
+    {
+        using var sha256 = SHA256.Create();
+
+        var sb = new StringBuilder()
+            .Append(Center)
+            .Append(Width)
+            .Append(Height)
+            .Append(Iterations);
+
+        var data = Encoding.UTF8.GetBytes(sb.ToString());
+        var hash = sha256.ComputeHash(data);
+
+        return BitConverter.ToString(hash);
+    }
     
-    private static bool IsMandelbrot(Complex number, int iterations)
+    private static bool IsMandelbrot(Complex number)
     {
         var z = default(Complex);
 
         int acc = 0;
-        while (acc < iterations && z.Magnitude < 2.0f)
+        while (acc < Iterations && z.Magnitude < 2.0f)
         {
             z = z * z + number;
             acc++;
         }
         
-        return iterations == acc;
+        return Iterations == acc;
     }
+
+    public static Texture2D CreateTexture(EvalMode mode) =>
+        mode switch
+        {
+            EvalMode.Parallel => CreateTextureParallel(),
+            EvalMode.Sequential => CreateTextureSequential(),
+            _ => throw new ArgumentException("Mode not supported")
+        };
 
     /// <summary>
     /// Parallel Fork/Join
     /// </summary>
-    public static Texture2D CreateTextureParallel()
+    private static Texture2D CreateTextureParallel()
     {
         try
         {
@@ -62,7 +109,7 @@ public static unsafe class Mandelbrot
 
                     var complex = new Complex(y, x);
                     
-                    if (IsMandelbrot(complex, 100)) _pixels[row * TextureSize.Width + col] = Color.Green;
+                    if (IsMandelbrot(complex)) _pixels[row * TextureSize.Width + col] = Color.Green;
                     else _pixels[row * TextureSize.Width + col] = Color.Black;
                 }
             });
@@ -80,7 +127,7 @@ public static unsafe class Mandelbrot
     /// <summary>
     /// One-core sequential processing
     /// </summary>
-    public static Texture2D CreateTexture()
+    private static Texture2D CreateTextureSequential()
     {
         try
         {
@@ -93,7 +140,7 @@ public static unsafe class Mandelbrot
 
                     var complex = new Complex(y, x);
                     
-                    if (IsMandelbrot(complex, 100)) _pixels[row * TextureSize.Width + col] = Color.Green;
+                    if (IsMandelbrot(complex)) _pixels[row * TextureSize.Width + col] = Color.Green;
                     else _pixels[row * TextureSize.Width + col] = Color.Black;
                 }
             }

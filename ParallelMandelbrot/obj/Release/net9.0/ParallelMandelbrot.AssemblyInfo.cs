@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ParallelMandelbrot")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a91ccead1804f7db1a5f12b8b0720cdbaa9992e9")]
 [assembly: System.Reflection.AssemblyProductAttribute("ParallelMandelbrot")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ParallelMandelbrot")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
