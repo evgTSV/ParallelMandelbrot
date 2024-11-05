@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
@@ -36,6 +37,8 @@ public static unsafe class Mandelbrot
 
     public static float Width;
     public static float Height;
+
+    public static long EvaluationTime { get; set; }
 
     public static int Iterations
     {
@@ -93,13 +96,24 @@ public static unsafe class Mandelbrot
         return Iterations == acc;
     }
 
-    public static Texture2D CreateTexture(EvalMode mode) =>
-        mode switch
+    public static Texture2D CreateTexture(EvalMode mode)
+    {
+        var sw = Stopwatch.StartNew();
+        
+        var texture = mode switch
         {
             EvalMode.Parallel => CreateTextureParallel(),
             EvalMode.Sequential => CreateTextureSequential(),
             _ => throw new ArgumentException("Mode not supported")
         };
+        
+        sw.Stop();
+
+        EvaluationTime = sw.ElapsedMilliseconds;
+
+        return texture;
+    }
+        
 
     /// <summary>
     /// Parallel Fork/Join

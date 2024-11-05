@@ -31,6 +31,9 @@ public class InputProcessor
 
         switch (key)
         {
+            case KeyboardKey.Q:
+                DynamicRules.ShowDiagnosticInfo = !DynamicRules.ShowDiagnosticInfo;
+                break;
             case KeyboardKey.P:
                 DynamicRules.EvalMode = EvalMode.Parallel;
                 break;

@@ -26,18 +26,22 @@ while (!Raylib.WindowShouldClose())
     Raylib.BeginDrawing();
     
     Raylib.DrawTexture(texture, 0, 0, Color.RayWhite);
-    Raylib.DrawFPS(10, 10);
-    DrawConfigurationInfo();
+    DrawDiagnosticInfo();
     
     Raylib.EndDrawing();
 }
 Raylib.UnloadTexture(texture);
 WindowControl.CloseWindow();
 
-static void DrawConfigurationInfo()
+static void DrawDiagnosticInfo()
 {
-    Raylib.DrawText($"Iterations: {Mandelbrot.Iterations}", 100, 15, 10, Color.White);
-    Raylib.DrawText($"Eval mode: {DynamicRules.EvalMode.ToString()}", 100, 30, 10, Color.White);
+    if (DynamicRules.ShowDiagnosticInfo)
+    {
+        Raylib.DrawFPS(10, 10);
+        Raylib.DrawText($"Iterations: {Mandelbrot.Iterations}", 100, 15, 10, Color.White);
+        Raylib.DrawText($"Eval mode: {DynamicRules.EvalMode.ToString()}", 100, 30, 10, Color.White);
+        Raylib.DrawText($"Time to load texture: {Mandelbrot.EvaluationTime} ms", 100, 45, 10, Color.White);
+    }
 }
 
 static Func<bool> MandelbrotChanged(string targetHash) => 
