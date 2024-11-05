@@ -19,7 +19,7 @@ public static unsafe class Mandelbrot
     {
         ToInitialState();
     }
-    
+
     public static void ToInitialState()
     {
         Center = new(0.0f, -0.75f);
@@ -27,16 +27,24 @@ public static unsafe class Mandelbrot
         Height = 2.5f;
         Iterations = 100;
     }
-    
+
     private static Color* _pixels = Raylib.New<Color>(0);
     private static Size _textureSize;
-    
+    private static int _iterations;
+
     public static Complex Center;
-    
+
     public static float Width;
     public static float Height;
 
-    public static int Iterations;
+    public static int Iterations
+    {
+        get => _iterations;
+        set
+        {
+            if (value >= 0) _iterations = value;
+        }
+    }
 
     public static Size TextureSize
     {
@@ -70,7 +78,7 @@ public static unsafe class Mandelbrot
 
         return BitConverter.ToString(hash);
     }
-    
+
     private static bool IsMandelbrot(Complex number)
     {
         var z = default(Complex);
@@ -81,7 +89,7 @@ public static unsafe class Mandelbrot
             z = z * z + number;
             acc++;
         }
-        
+
         return Iterations == acc;
     }
 
@@ -108,12 +116,12 @@ public static unsafe class Mandelbrot
                     double y = ComputeColumn(col, TextureSize.Width);
 
                     var complex = new Complex(y, x);
-                    
+
                     if (IsMandelbrot(complex)) _pixels[row * TextureSize.Width + col] = Color.Green;
                     else _pixels[row * TextureSize.Width + col] = Color.Black;
                 }
             });
-            
+
             return CreateTextureFromPixels(_pixels, TextureSize);
         }
         catch (Exception ex)
@@ -123,7 +131,7 @@ public static unsafe class Mandelbrot
             throw;
         }
     }
-    
+
     /// <summary>
     /// One-core sequential processing
     /// </summary>
@@ -139,12 +147,12 @@ public static unsafe class Mandelbrot
                     double y = ComputeColumn(col, TextureSize.Width);
 
                     var complex = new Complex(y, x);
-                    
+
                     if (IsMandelbrot(complex)) _pixels[row * TextureSize.Width + col] = Color.Green;
                     else _pixels[row * TextureSize.Width + col] = Color.Black;
                 }
             }
-            
+
             return CreateTextureFromPixels(_pixels, TextureSize);
         }
         catch (Exception ex)
@@ -165,7 +173,7 @@ public static unsafe class Mandelbrot
             Width = size.Width,
             Mipmaps = 1
         };
-        
+
         var texture = Raylib.LoadTextureFromImage(mandelbrotImg);
 
         return texture;
